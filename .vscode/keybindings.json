@@ -1,0 +1,7 @@
+[
+    {
+        "key": "ctrl+alt+c",
+        "command": "copy-project-structure.copyProject",
+        "when": "editorTextFocus"
+    }
+]

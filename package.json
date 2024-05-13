@@ -1,5 +1,5 @@
 {
-  "name": "project-structure-copy",
+  "name": "copy-project-structure",
   "displayName": "Project Structure Copy",
   "description": "Copy your project's hierarchy and files into the clipboard, useful for sending your whole environment as context to an AI.",
   "version": "0.0.1",
@@ -14,10 +14,33 @@
   "contributes": {
     "commands": [
       {
-        "command": "project-structure-copy.helloWorld",
-        "title": "Hello World"
+        "command": "copy-project-structure.copyProject",
+        "title": "Copy Project"
       }
-    ]
+    ],
+    "configuration": {
+        "type": "object",
+        "properties": {
+            "projectStructure.exclusions": {
+                "type": "array",
+                "items": {
+                    "type": "string"
+                },
+                "default": [
+                    "node_modules",
+                    "__pycache__",
+                    ".vscode",
+                    ".git"
+                ],
+                "description": "List of directories to exclude from the project structure."
+            },
+            "projectStructure.includeFileContent": {
+                "type": "boolean",
+                "default": true,
+                "description": "Whether to include the content of files after the project structure."
+            }
+        }
+    }
   },
   "scripts": {
     "vscode:prepublish": "npm run package",
@@ -34,16 +57,16 @@
     "test": "vscode-test"
   },
   "devDependencies": {
-    "@types/vscode": "^1.89.0",
     "@types/mocha": "^10.0.6",
     "@types/node": "18.x",
+    "@types/vscode": "^1.89.0",
     "@typescript-eslint/eslint-plugin": "^7.7.1",
     "@typescript-eslint/parser": "^7.7.1",
-    "eslint": "^8.57.0",
-    "esbuild": "^0.20.2",
-    "npm-run-all": "^4.1.5",
-    "typescript": "^5.4.5",
     "@vscode/test-cli": "^0.0.9",
-    "@vscode/test-electron": "^2.3.9"
+    "@vscode/test-electron": "^2.3.9",
+    "esbuild": "^0.20.2",
+    "eslint": "^8.57.0",
+    "npm-run-all": "^4.1.5",
+    "typescript": "^5.4.5"
   }
 }

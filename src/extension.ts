@@ -1,26 +1,63 @@
-// The module 'vscode' contains the VS Code extensibility API
-// Import the module and reference it with the alias vscode in your code below
 import * as vscode from 'vscode';
+import * as path from 'path';
+import * as fs from 'fs';
 
-// This method is called when your extension is activated
-// Your extension is activated the very first time the command is executed
+
 export function activate(context: vscode.ExtensionContext) {
+    console.log('Congratulations, your extension "project-structure" is now active!');
 
-	// Use the console to output diagnostic information (console.log) and errors (console.error)
-	// This line of code will only be executed once when your extension is activated
-	console.log('Congratulations, your extension "project-structure-copy" is now active!');
+    let disposable = vscode.commands.registerCommand('copy-project-structure.copyProject', async () => {
+        const workspacePath = vscode.workspace.rootPath;
+        if (workspacePath) {
+            const exclusions = vscode.workspace.getConfiguration().get('projectStructure.exclusions', []);
+            const includeFileContent = vscode.workspace.getConfiguration().get('projectStructure.includeFileContent', false);
+            const projectStructure = getProjectStructure(workspacePath, exclusions, includeFileContent);
+            await vscode.env.clipboard.writeText(projectStructure);
+            vscode.window.showInformationMessage('Project structure copied to clipboard!');
+        } else { vscode.window.showErrorMessage('No workspace opened!'); }
+    });
 
-	// The command has been defined in the package.json file
-	// Now provide the implementation of the command with registerCommand
-	// The commandId parameter must match the command field in package.json
-	let disposable = vscode.commands.registerCommand('project-structure-copy.helloWorld', () => {
-		// The code you place here will be executed every time your command is executed
-		// Display a message box to the user
-		vscode.window.showInformationMessage('Hello World from Project Structure Copy!');
-	});
-
-	context.subscriptions.push(disposable);
+    context.subscriptions.push(disposable);
 }
 
-// This method is called when your extension is deactivated
+function getProjectStructure(workspacePath: string, exclusions: string[], includeFileContent: boolean): string {
+    let structure = vscode.workspace.name + '/\n';
+    let fileContent = '';
+
+    const buildStructure = (currentPath: string, indent: string = '') => {
+        const files = fs.readdirSync(currentPath);
+        files.forEach(file => {
+            if (exclusions.includes(file)) { return; }
+            const filePath = path.join(currentPath, file);
+            const stats = fs.statSync(filePath);
+            if (stats.isDirectory()) {
+                structure += `${indent}├── ${file}/\n`;
+                buildStructure(filePath, indent + '│   ');
+            } else { structure += `${indent}├── ${file}\n`; }
+        });
+    };
+
+    function buildFileContent(currentPath: string, indent: string = '') {
+        const files = fs.readdirSync(currentPath);
+        files.forEach(file => {
+            if (exclusions.includes(file)) { return; }
+            const filePath = path.join(currentPath, file);
+            const stats = fs.statSync(filePath);
+            if (!stats.isDirectory()) {
+                fileContent += `\n${indent}${file}:\n\n`;
+                const fileContentLines = fs.readFileSync(filePath, 'utf-8').split('\n');
+                fileContentLines.forEach(line => {
+                    fileContent += `${indent}${line}\n`;
+                });
+                fileContent += '\n';
+            }
+        });
+    }
+
+    buildStructure(workspacePath);
+    if (includeFileContent) { buildFileContent(workspacePath);}
+
+    return structure + '\n\n' + fileContent;
+}
+
 export function deactivate() {}
