@@ -2,6 +2,9 @@
   "name": "copy-project-structure",
   "displayName": "Project Structure Copy",
   "description": "Copy your project's hierarchy and files into the clipboard, useful for sending your whole environment as context to an AI.",
+  "repository": "https://github.com/marc-marcet/copy-project-structure",
+  "publisher": "MarcMarcet",
+  "icon": "images/icon.png",
   "version": "0.0.1",
   "engines": {
     "vscode": "^1.89.0"
